@@ -29,6 +29,10 @@ public class PropertiesPropertyResolver extends SimplePropertyResolver {
 
 	@Override
 	public String getProperty(String name) throws PropertyNotFoundException {
-		return properties.getProperty(name);
+		String value = properties.getProperty(name);
+		if (value == null) {
+			throw new PropertyNotFoundException(name);
+		}
+		return value;
 	}
 }

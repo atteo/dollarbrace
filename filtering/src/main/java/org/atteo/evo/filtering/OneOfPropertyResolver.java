@@ -17,7 +17,7 @@ package org.atteo.evo.filtering;
 
 import java.util.List;
 
-import org.atteo.evo.filtering.Filtering.Token;
+import org.atteo.evo.filtering.spi.Tokenizer;
 
 import com.google.common.base.Splitter;
 
@@ -30,24 +30,24 @@ public class OneOfPropertyResolver implements PrefixedPropertyResolver {
 	}
 
 	@Override
-	public String resolveProperty(String name, PropertyResolver resolver) throws PropertyNotFoundException {
+	public String resolveProperty(String name, PropertyFilter resolver) throws PropertyNotFoundException {
 		if (!name.startsWith(prefix)) {
 			return null;
 		}
 		name = name.substring(prefix.length());
-		List<Token> tokens = Filtering.splitIntoTokens(name);
+		List<Tokenizer.Token> tokens = Tokenizer.splitIntoTokens(name);
 
 		StringBuilder result = new StringBuilder();
 		boolean skip = false;
 
-		for (Token token : tokens) {
+		for (Tokenizer.Token token : tokens) {
 			if (token.isProperty()) {
 				if (!skip) {
-					String value = Filtering.getProperty(token.getValue(), resolver);
-					if (value == null) {
+					try {
+						result.append(resolver.getProperty(token.getValue()));
+					} catch (PropertyNotFoundException e) {
 						skip = true;
 					}
-					result.append(value);
 				}
 			} else {
 				boolean first = true;
@@ -63,14 +63,12 @@ public class OneOfPropertyResolver implements PrefixedPropertyResolver {
 					if (!skip) {
 						result.append(p);
 					}
-					if (first) {
-						first = false;
-					}
+					first = false;
 				}
 			}
 		}
 		if (skip) {
-			return null;
+			throw new PropertyNotFoundException(name);
 		}
 
 		return result.toString();

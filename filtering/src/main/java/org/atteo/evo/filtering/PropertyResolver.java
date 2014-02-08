@@ -13,6 +13,8 @@
  */
 package org.atteo.evo.filtering;
 
+import javax.annotation.Nonnull;
+
 /**
  * Resolves property name to its value possibly resolving recursively any placeholders.
  */
@@ -20,9 +22,10 @@ public interface PropertyResolver {
 	/**
 	 * Get value for the given property.
 	 * @param name name of the property to resolve
-	 * @param resolver property resolver for recursive resolution
-	 * @return value associated for the property or null if the property cannot be resolved by this resolver
-	 * @throws PropertyNotFoundException when we are sure the property cannot be resolved by any other resolver
+	 * @param filter property filter to use when resolving recursively
+	 * @return value associated for the property
+	 * @throws PropertyNotFoundException when property cannot be resolved
 	 */
-	String resolveProperty(String name, PropertyResolver resolver) throws PropertyNotFoundException;
+	@Nonnull
+	String resolveProperty(String name, PropertyFilter filter) throws PropertyNotFoundException;
 }

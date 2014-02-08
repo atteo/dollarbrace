@@ -18,6 +18,7 @@ import java.util.Properties;
 import org.atteo.evo.filtering.CompoundPropertyResolver;
 import org.atteo.evo.filtering.Filtering;
 import org.atteo.evo.filtering.PropertiesPropertyResolver;
+import org.atteo.evo.filtering.PropertyFilter;
 import org.atteo.evo.filtering.PropertyNotFoundException;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -34,12 +35,11 @@ public class JaninoPropertyResolverTest {
 		assertEquals("6", result);
 	}
 
-	@Test
+	@Test(expected = PropertyNotFoundException.class)
 	public void noPrefix() throws PropertyNotFoundException {
 		JaninoPropertyResolver resolver = new JaninoPropertyResolver();
 
-		String result = Filtering.getProperty("3+3", resolver);
-		assertEquals(null, result);
+		Filtering.getProperty("3+3", resolver);
 	}
 
 	@Test(expected = RuntimeException.class)
@@ -53,10 +53,10 @@ public class JaninoPropertyResolverTest {
 		Properties properties = new Properties();
 		properties.setProperty("test1", "${java:3+3}");
 		properties.setProperty("test2", "${test${java:2-1}}");
-		CompoundPropertyResolver resolver = new CompoundPropertyResolver(
+		PropertyFilter filter = Filtering.getFilter(
 				new JaninoPropertyResolver(),
 				new PropertiesPropertyResolver(properties));
-		assertEquals("6", Filtering.getProperty("test2", resolver));
+		assertEquals("6", filter.getProperty("test2"));
 	}
 
 	@Test(expected = PropertyNotFoundException.class)

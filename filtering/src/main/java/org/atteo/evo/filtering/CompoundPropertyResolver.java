@@ -31,8 +31,8 @@ import com.google.common.collect.Multimap;
  * </p>
  */
 public class CompoundPropertyResolver implements PropertyResolver {
-	private List<PropertyResolver> resolvers = Lists.newArrayList();
-	private Multimap<String, PrefixedPropertyResolver> prefixedResolvers = ArrayListMultimap.create();
+	private final List<PropertyResolver> resolvers = Lists.newArrayList();
+	private final Multimap<String, PrefixedPropertyResolver> prefixedResolvers = ArrayListMultimap.create();
 
 	public CompoundPropertyResolver(PropertyResolver... resolvers) {
 		for (PropertyResolver resolver : resolvers) {
@@ -53,13 +53,14 @@ public class CompoundPropertyResolver implements PropertyResolver {
 	}
 
 	@Override
-	public String resolveProperty(String name, PropertyResolver recurse) throws PropertyNotFoundException {
+	public String resolveProperty(String name, PropertyFilter recurse) throws PropertyNotFoundException {
 		for (Entry<String, Collection<PrefixedPropertyResolver>> entry : prefixedResolvers.asMap().entrySet()) {
 			if (name.startsWith(entry.getKey())) {
 				for (PrefixedPropertyResolver resolver : entry.getValue()) {
-					String value = resolver.resolveProperty(name, recurse);
-					if (value != null) {
-						return value;
+					try {
+						return resolver.resolveProperty(name, recurse);
+					} catch (PropertyNotFoundException e) {
+						// ok, try next one
 					}
 				}
 				throw new PropertyNotFoundException(name);
@@ -67,11 +68,12 @@ public class CompoundPropertyResolver implements PropertyResolver {
 		}
 
 		for (PropertyResolver resolver : resolvers) {
-			String value = resolver.resolveProperty(name, recurse);
-			if (value != null) {
-				return value;
+			try {
+				return resolver.resolveProperty(name, recurse);
+			} catch (PropertyNotFoundException e) {
+				// ok, try next one
 			}
 		}
-		return null;
+		throw new PropertyNotFoundException(name);
 	}
 }

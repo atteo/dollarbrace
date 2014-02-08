@@ -15,8 +15,8 @@ package org.atteo.evo.janino;
 
 import java.lang.reflect.InvocationTargetException;
 
-import org.atteo.evo.filtering.Filtering;
 import org.atteo.evo.filtering.PrefixedPropertyResolver;
+import org.atteo.evo.filtering.PropertyFilter;
 import org.atteo.evo.filtering.PropertyNotFoundException;
 import org.atteo.evo.filtering.PropertyResolver;
 import org.codehaus.commons.compiler.CompileException;
@@ -55,16 +55,16 @@ public class JaninoPropertyResolver implements PrefixedPropertyResolver {
 	}
 
 	@Override
-	public String resolveProperty(String name, PropertyResolver resolver) throws PropertyNotFoundException {
-		name = Filtering.filter(name, resolver);
-		name = name.trim();
+	public String resolveProperty(String name, PropertyFilter resolver) throws PropertyNotFoundException {
 		boolean throwErrors = false;
 		if (name.startsWith(prefix)) {
 			name = name.substring(prefix.length());
 			throwErrors = true;
 		} else if (!useWithoutPrefix) {
-			return null;
+			throw new PropertyNotFoundException(name);
 		}
+		name = resolver.filter(name);
+		name = name.trim();
 		ExpressionEvaluator evaluator = new ExpressionEvaluator();
 		evaluator.setExpressionType(Object.class);
 		evaluator.setThrownExceptions(new Class[] { Exception.class });
@@ -73,12 +73,13 @@ public class JaninoPropertyResolver implements PrefixedPropertyResolver {
 			return evaluator.evaluate(new Object[] {}).toString();
 		} catch (CompileException e) {
 			if (!throwErrors) {
-				return null;
+				throw new PropertyNotFoundException(name);
 			}
+			// TODO: new SyntaxException?
 			throw new RuntimeException(e);
 		} catch (InvocationTargetException e) {
 			if (!throwErrors) {
-				return null;
+				throw new PropertyNotFoundException(name);
 			}
 			throw new RuntimeException(e);
 		}

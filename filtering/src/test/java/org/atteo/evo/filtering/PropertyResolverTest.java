@@ -22,7 +22,6 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
 import org.junit.Test;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
@@ -116,11 +115,20 @@ public class PropertyResolverTest {
 		assertEquals("test", Filtering.getProperty("config.a.value", resolver));
 		assertEquals("test2", Filtering.getProperty("config.b", resolver));
 		assertEquals("test3", Filtering.getProperty("config.c.d", resolver));
-		assertNull(Filtering.getProperty("config.e.f", resolver));
 		assertEquals("test6", Filtering.getProperty("config.g.h.i", resolver));
 
 		resolver = new XmlPropertyResolver(document.getDocumentElement(), false);
-		assertEquals("test", resolver.resolveProperty("a.value", resolver));
-		assertEquals("test6", resolver.resolveProperty("g.h.i", resolver));
+		assertEquals("test", Filtering.getProperty("a.value", resolver));
+		assertEquals("test6", Filtering.getProperty("g.h.i", resolver));
+	}
+
+	@Test(expected = PropertyNotFoundException.class)
+	public void shouldThrowWhenPropertyIsNotFound() throws PropertyNotFoundException {
+		Filtering.getProperty("a", new PropertyResolver() {
+			@Override
+			public String resolveProperty(String name, PropertyFilter filter) throws PropertyNotFoundException {
+				throw new PropertyNotFoundException(name);
+			}
+		});
 	}
 }

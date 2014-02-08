@@ -42,8 +42,8 @@ import org.w3c.dom.NodeList;
  * </p>
  */
 public class XmlPropertyResolver extends SimplePropertyResolver {
-	private Element rootElement;
-	private boolean matchRoot;
+	private final Element rootElement;
+	private final boolean matchRoot;
 
 	/**
 	 * Create new property resolver based on XML tree.
@@ -59,7 +59,7 @@ public class XmlPropertyResolver extends SimplePropertyResolver {
 	public String getProperty(String name) throws PropertyNotFoundException {
 		String value = getValue(name);
 		if (value == null) {
-			return null;
+			throw new PropertyNotFoundException(name);
 		}
 		return value;
 	}

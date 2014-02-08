@@ -13,27 +13,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.atteo.evo.filtering;
+package org.atteo.evo.filtering.spi;
 
 import java.util.List;
 
-import org.atteo.evo.filtering.Filtering.Token;
+import org.atteo.evo.filtering.spi.Tokenizer.Token;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 
-public class FilteringTest {
+public class TokenizerTest {
 	@Test
 	public void simple() {
-		List<Token> tokens = Filtering.splitIntoTokens("${a}");
+		List<Token> tokens = Tokenizer.splitIntoTokens("${a}");
 		assertEquals(1, tokens.size());
 		assertTrue(tokens.get(0).isProperty());
 	}
 
 	@Test
 	public void nested() {
-		List<Token> tokens = Filtering.splitIntoTokens("${a_${b}}");
+		List<Token> tokens = Tokenizer.splitIntoTokens("${a_${b}}");
 		assertEquals(1, tokens.size());
 		assertTrue(tokens.get(0).isProperty());
 		assertEquals("a_${b}", tokens.get(0).getValue());
@@ -41,7 +41,7 @@ public class FilteringTest {
 
 	@Test
 	public void multiple() {
-		List<Token> tokens = Filtering.splitIntoTokens("${a} ${b}");
+		List<Token> tokens = Tokenizer.splitIntoTokens("${a} ${b}");
 		assertEquals(3, tokens.size());
 		assertFalse(tokens.get(1).isProperty());
 		assertTrue(tokens.get(2).isProperty());
@@ -50,10 +50,10 @@ public class FilteringTest {
 
 	@Test
 	public void incorrect() {
-		List<Token> tokens = Filtering.splitIntoTokens("${abc} }");
+		List<Token> tokens = Tokenizer.splitIntoTokens("${abc} }");
 		assertEquals(" }", tokens.get(1).getValue());
 
-		tokens = Filtering.splitIntoTokens("${abc} ${a");
+		tokens = Tokenizer.splitIntoTokens("${abc} ${a");
 		assertEquals(" ${a", tokens.get(1).getValue());
 	}
 }

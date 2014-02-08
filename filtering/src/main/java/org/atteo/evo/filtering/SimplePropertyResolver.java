@@ -15,6 +15,8 @@
  */
 package org.atteo.evo.filtering;
 
+import javax.annotation.Nonnull;
+
 /**
  * Simple property resolver which provides the value for some name.
  */
@@ -22,29 +24,32 @@ public abstract class SimplePropertyResolver implements PropertyResolver {
 	protected boolean filterResult = true;
 
 	/**
-	 * If true, will filter the value returned by {@link #getProperty(String)}.
+	 * Specifies if the value returned by {@link #getProperty(String)} should be filtered.
+	 * @param filterResult when true, the result of {@link #getProperty(String)} will be recursively filtered
 	 */
 	public void setFilterResult(boolean filterResult) {
 		this.filterResult = filterResult;
 	}
 
 	@Override
-	public String resolveProperty(String name, PropertyResolver resolver) throws PropertyNotFoundException {
-		name = Filtering.filter(name, resolver);
+	@Nonnull
+	public String resolveProperty(String name, PropertyFilter resolver) throws PropertyNotFoundException {
+		name = resolver.filter(name);
 		String value = getProperty(name);
-		if (value == null) {
-			return null;
-		}
 		if (filterResult) {
-			return Filtering.filter(value, resolver);
+			return resolver.filter(value);
 		} else {
 			return value;
 		}
 	}
 
 	/**
-	 * Returns property value which will be optionally filtered for any properties.
-	 * Otherwise should behave the same as {@link PropertyResolver#resolveProperty(String, PropertyResolver)}.
+	 * Returns the value for the property with given name.
+	 * If {@link #setFilterResult(boolean)} was set to true, the returned value will be filtered.
+	 * @param name name of the property
+	 * @return property value
+	 * @throws PropertyNotFoundException when property cannot be found
 	 */
+	@Nonnull
 	public abstract String getProperty(String name) throws PropertyNotFoundException;
 }

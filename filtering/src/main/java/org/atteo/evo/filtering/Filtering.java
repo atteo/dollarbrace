@@ -13,12 +13,12 @@
  */
 package org.atteo.evo.filtering;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Properties;
 import java.util.Set;
 
+import org.atteo.evo.filtering.spi.Tokenizer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Attr;
@@ -28,22 +28,23 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.w3c.dom.Text;
 
+
 /**
  * Properties filtering engine.
  */
 public class Filtering {
 	private final static Logger logger = LoggerFactory.getLogger(Filtering.class);
 
-	private final static class LoopCheckerResolver implements PropertyResolver {
+	private final static class LoopCheckerPropertyFilter implements PropertyFilter {
 		private final Set<String> inProgress = new HashSet<String>();
 		private final PropertyResolver resolver;
 
-		private LoopCheckerResolver(PropertyResolver resolver) {
+		private LoopCheckerPropertyFilter(PropertyResolver resolver) {
 			this.resolver = resolver;
 		}
 
 		@Override
-		public String resolveProperty(String name, PropertyResolver ignore) throws PropertyNotFoundException {
+		public String getProperty(String name) throws PropertyNotFoundException {
 			if (inProgress.contains(name)) {
 				throw new CircularPropertyResolutionException(name);
 			}
@@ -56,128 +57,64 @@ public class Filtering {
 
 			return value;
 		}
-	}
 
-	public static final class Token {
-		private final String value;
-		private final boolean property;
+		@Override
+		public String filter(String name) throws PropertyNotFoundException {
+			List<Tokenizer.Token> parts = Tokenizer.splitIntoTokens(name);
+			StringBuilder result = new StringBuilder();
 
-		public Token(String value, boolean property) {
-			this.value = value;
-			this.property = property;
+			for (Tokenizer.Token part : parts) {
+				if (part.isProperty()) {
+					String propertyValue = getProperty(part.getValue());
+					if (propertyValue == null) {
+						throw new PropertyNotFoundException(part.getValue());
+					}
+					result.append(propertyValue);
+				} else {
+					result.append(part.getValue());
+				}
+			}
+			return result.toString();
 		}
 
-		public String getValue() {
-			return value;
+		@Override
+		public void filter(Element element) throws PropertyNotFoundException {
+			new XmlFiltering(this).filterElement(element);
 		}
-
-		public boolean isProperty() {
-			return property;
-		}
-	}
-
-	public static String getProperty(String value, PropertyResolver resolver) throws PropertyNotFoundException {
-		// optimization: we don't need another one
-		if (resolver instanceof LoopCheckerResolver) {
-			return resolver.resolveProperty(value, null);
-		}
-		return new LoopCheckerResolver(resolver).resolveProperty(value, resolver);
 	}
 
 	/**
-	 * Filter <code>${name}</code> placeholders found within the value using given property resolver.
+	 * Returns property filter which resolves properties using provided resolvers.
+	 * @param resolvers property resolvers
+	 * @return property filter
+	 */
+	public static PropertyFilter getFilter(PropertyResolver... resolvers) {
+		if (resolvers.length == 1) {
+			return new LoopCheckerPropertyFilter(resolvers[0]);
+		}
+		return new LoopCheckerPropertyFilter(new CompoundPropertyResolver(resolvers));
+	}
+
+	/**
+	 * Resolves property with the given property resolver.
+	 * @param name property name to resolve
+	 * @param resolver property resolver
+	 * @return property value resolved with given resolver
+	 * @throws PropertyNotFoundException  when property is not found
+	 */
+	public static String getProperty(String name, PropertyResolver resolver) throws PropertyNotFoundException {
+		return new LoopCheckerPropertyFilter(resolver).getProperty(name);
+	}
+
+	/**
+	 * Filters string by replacing properties denoted by the <code>${...}</code> delimeters with their resolved values.
 	 * @param value the value to filter the properties into
-	 * @param propertyResolver resolver for the property values
+	 * @param resolver resolver for the property values
 	 * @return filtered value
 	 * @throws PropertyNotFoundException when some property cannot be found
 	 */
-	public static String filter(String value, PropertyResolver propertyResolver)
-			throws PropertyNotFoundException {
-		List<Token> parts = splitIntoTokens(value);
-		StringBuilder result = new StringBuilder();
-
-		for (Token part : parts) {
-			if (part.isProperty()) {
-				String propertyValue = getProperty(part.getValue(), propertyResolver);
-				if (propertyValue == null) {
-					throw new PropertyNotFoundException(part.getValue());
-					//result.append(value.subSequence(position, endposition + 1));
-					//break;
-				}
-				result.append(propertyValue);
-			} else {
-				result.append(part.getValue());
-			}
-		}
-		return result.toString();
-	}
-
-	/**
-	 * Splits given string into {@link Token tokens}.
-	 * <p>
-	 * Token is ordinary text or property placeholder: <code>${name}</code>.
-	 * For instance the string: "abc${abc}abc" will be split
-	 * into three tokens: text "abc", property "abc" and text "abc".
-	 * </p>
-	 * @param input input string to split into tokens
-	 * @return list of tokens
-	 */
-	public static List<Token> splitIntoTokens(String input) {
-		List<Token> parts = new ArrayList<Token>();
-		int index = 0;
-
-		while (true) {
-			int startPosition = input.indexOf("${", index);
-			if (startPosition == -1) {
-				break;
-			}
-			// find '${' and '}' pair, correctly handle nested pairs
-			boolean lastDollar = false;
-			int count = 1;
-			int countBrace = 0;
-			int endposition;
-			for (endposition = startPosition + 2; endposition < input.length(); endposition++) {
-				if (input.charAt(endposition) == '$') {
-					lastDollar = true;
-					continue;
-				}
-				if (input.charAt(endposition) == '{') {
-					if (lastDollar) {
-						count++;
-					} else {
-						countBrace++;
-					}
-				} else if (input.charAt(endposition) == '}') {
-					if (countBrace > 0) {
-						countBrace--;
-					} else {
-						count--;
-						if (count == 0) {
-							break;
-						}
-					}
-				}
-				lastDollar = false;
-			}
-
-			if (count > 0) {
-				break;
-			}
-
-			if (index != startPosition) {
-				parts.add(new Token(input.substring(index, startPosition), false));
-			}
-
-			String propertyName = input.substring(startPosition + 2, endposition);
-			index = endposition + 1;
-
-			parts.add(new Token(propertyName, true));
-		}
-
-		if (index != input.length()) {
-			parts.add(new Token(input.substring(index), false));
-		}
-		return parts;
+	public static String filter(String value, PropertyResolver resolver) throws PropertyNotFoundException {
+		return new LoopCheckerPropertyFilter(resolver).filter(value);
 	}
 
 	/**
@@ -200,34 +137,34 @@ public class Filtering {
 	 * The structure of the XML document is not changed. Each attribute and element text is filtered
 	 * separately.
 	 * </p>
-	 * @param element
-	 * @param propertyResolver
-	 * @throws PropertyNotFoundException
+	 * @param element XML element to filter
+	 * @param resolver property resolver
+	 * @throws PropertyNotFoundException when some property could not be resolved
 	 */
-	public static void filter(Element element, PropertyResolver propertyResolver)
-			throws PropertyNotFoundException {
-		XmlFiltering filtering = new XmlFiltering(propertyResolver);
-		filtering.filterElement(element);
+	public static void filter(Element element, PropertyResolver resolver) throws PropertyNotFoundException {
+		getFilter(resolver).filter(element);
 	}
 
 	/**
 	 * Filter <code>${name}</code> placeholders found within the XML element.
 	 *
+	 * @param element XML element to filter
+	 * @param properties properties to filter
+	 * @throws PropertyNotFoundException when some property could not be resolved
 	 * @see #filter(Element, PropertyResolver)
 	 */
-	public static void filter(Element element, Properties properties)
-			throws PropertyNotFoundException {
+	public static void filter(Element element, Properties properties) throws PropertyNotFoundException {
 		filter(element, new PropertiesPropertyResolver(properties));
 	}
 
 	private static class XmlFiltering {
-		private final PropertyResolver propertyResolver;
+		private final PropertyFilter propertyFilter;
 
-		private XmlFiltering(PropertyResolver propertyResolver) {
-			this.propertyResolver = propertyResolver;
+		private XmlFiltering(PropertyFilter propertyResolver) {
+			this.propertyFilter = propertyResolver;
 		}
 
-		private void filterElement(Element element) throws PropertyNotFoundException {
+		public void filterElement(Element element) throws PropertyNotFoundException {
 			NamedNodeMap attributes = element.getAttributes();
 			for (int i = 0; i < attributes.getLength(); i++) {
 				Node node = attributes.item(i);
@@ -257,7 +194,7 @@ public class Filtering {
 		}
 
 		private String filterString(String value) throws PropertyNotFoundException {
-			return Filtering.filter(value, propertyResolver);
+			return propertyFilter.filter(value);
 		}
 	}
 }

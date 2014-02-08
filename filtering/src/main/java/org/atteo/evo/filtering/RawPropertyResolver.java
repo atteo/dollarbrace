@@ -27,9 +27,9 @@ public class RawPropertyResolver implements PrefixedPropertyResolver {
 	}
 
 	@Override
-	public String resolveProperty(String name, PropertyResolver resolver) {
+	public String resolveProperty(String name, PropertyFilter resolver) throws PropertyNotFoundException {
 		if (!name.startsWith(prefix)) {
-			return null;
+			throw new PropertyNotFoundException(name);
 		}
 		return name.substring(prefix.length());
 	}

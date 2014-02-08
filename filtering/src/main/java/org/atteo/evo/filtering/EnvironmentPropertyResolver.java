@@ -33,7 +33,7 @@ public class EnvironmentPropertyResolver extends SimplePropertyResolver {
 	@Override
 	public String getProperty(String name) throws PropertyNotFoundException {
 		if (!name.startsWith(prefix)) {
-			return null;
+			throw new PropertyNotFoundException(name);
 		}
 		name = name.substring(prefix.length());
 		return System.getenv(name);

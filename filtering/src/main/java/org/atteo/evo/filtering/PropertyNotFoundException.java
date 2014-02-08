@@ -21,4 +21,8 @@ public class PropertyNotFoundException extends Exception {
 	public PropertyNotFoundException(String propertyName) {
 		super("Property not found: '" + propertyName + "'");
 	}
+
+	public PropertyNotFoundException(String propertyName, Throwable cause) {
+		super("Property not found: '" + propertyName + "': " + cause.getMessage(), cause);
+	}
 }

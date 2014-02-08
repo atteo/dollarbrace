@@ -19,6 +19,10 @@ package org.atteo.evo.filtering;
 public class SystemPropertyResolver extends SimplePropertyResolver {
 	@Override
 	public String getProperty(String name) throws PropertyNotFoundException {
-		return System.getProperty(name);
+		String value = System.getProperty(name);
+		if (value == null) {
+			throw new PropertyNotFoundException(name);
+		}
+		return value;
 	}
 }
