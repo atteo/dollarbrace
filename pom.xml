@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<artifactId>parent</artifactId>
+		<groupId>org.atteo</groupId>
+		<version>1.8</version>
+		<relativePath />
+	</parent>
+	<artifactId>evo-filtering-parent</artifactId>
+	<version>1.0-SNAPSHOT</version>
+	<packaging>pom</packaging>
+	<name>Evo Filtering</name>
+	<!-- Javadoc adds /apidocs to this URL when it tries to find Javadocs. Make it happy. -->
+	<url>http://atteo.org/static/evo-filtering</url>
+	<developers>
+		<developer>
+			<id>sentinel</id>
+			<name>Sławek Piotrowski</name>
+			<email>sentinel@atteo.com</email>
+		</developer>
+	</developers>
+	<modules>
+		<module>filtering</module>
+		<module>janino</module>
+	</modules>
+	<scm>
+		<connection>scm:git:https://github.com/atteo/evo-filtering.git</connection>
+		<url>https://github.com/atteo/evo-filtering</url>
+	</scm>
+</project>
