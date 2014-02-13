@@ -19,8 +19,6 @@ import java.util.Properties;
 import java.util.Set;
 
 import org.atteo.evo.filtering.spi.Tokenizer;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.w3c.dom.Attr;
 import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
@@ -33,8 +31,6 @@ import org.w3c.dom.Text;
  * Properties filtering engine.
  */
 public class Filtering {
-	private final static Logger logger = LoggerFactory.getLogger(Filtering.class);
-
 	private final static class LoopCheckerPropertyFilter implements PropertyFilter {
 		private final Set<String> inProgress = new HashSet<String>();
 		private final PropertyResolver resolver;
@@ -48,7 +44,6 @@ public class Filtering {
 			if (inProgress.contains(name)) {
 				throw new CircularPropertyResolutionException(name);
 			}
-			logger.debug("Resolving property: " + name);
 			inProgress.add(name);
 
 			String value = resolver.resolveProperty(name, this);
