@@ -13,7 +13,7 @@
 	<packaging>pom</packaging>
 	<name>Atteo Filtering</name>
 	<!-- Javadoc adds /apidocs to this URL when it tries to find Javadocs. Make it happy. -->
-	<url>http://atteo.org/static/evo-filtering</url>
+	<url>http://atteo.org/static/filtering</url>
 	<developers>
 		<developer>
 			<id>sentinel</id>

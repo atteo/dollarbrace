@@ -1,7 +1,7 @@
 Overview
 ========
 
-Evo Filtering provides mechanisms to filter strings, files and XML trees to perform property resolution.
+Atteo Filtering provides mechanisms to filter strings, files and XML trees to perform property resolution.
 
 Changes
 =======
@@ -47,7 +47,7 @@ public class DatePropertyResolver implements PropertyResolver {
 }
 ```
 
-It is pretty easy to implement the resolver, but Evo Filtering already provides a number of ready to use resolvers:
+It is pretty easy to implement the resolver, but the library already provides a number of ready to use resolvers:
 
 * EnvironmentPropertyResolver - resolves ${env.NAME} with the value of environment variable named NAME.
 * SystemPropertyResolver - resolves ${NAME} from the Java system property provided with -DNAME="value"
@@ -67,8 +67,8 @@ It is pretty easy to implement the resolver, but Evo Filtering already provides 
 
 ```xml
 <dependency>
-    <groupId>org.atteo</groupId>
-    <artifactId>evo-janino</artifactId>
+    <groupId>org.atteo.filtering</groupId>
+    <artifactId>janino</artifactId>
     <version>1.0</version>
 </dependency>
 ```
