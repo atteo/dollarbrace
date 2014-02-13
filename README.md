@@ -3,6 +3,12 @@ Overview
 
 Evo Filtering provides mechanisms to filter strings, files and XML trees to perform property resolution.
 
+Changes
+=======
+1.0 (2014-02-13)
+	Splitted from evo-config
+	Separated filtering (PropertyFilter) from property resolution (PropertyResolver)
+
 Basic usage
 ===========
 To resolve any ${name} in given string from given Properties object just execute:
@@ -24,11 +30,24 @@ Each resolver is required to implement PropertyResolver interface:
 
 ```java
 public interface PropertyResolver {
-	String resolveProperty(String name, PropertyResolver resolver) throws PropertyNotFoundException;
+	String resolveProperty(String name, PropertyFilter filter) throws PropertyNotFoundException;
 }
 ```
 
-It is pretty easy to implement the resolver yourself, but Evo Filtering already provides a number of ready to use resolvers:
+For instance here is the resolver which always returns current date and time:
+
+```java
+public class DatePropertyResolver implements PropertyResolver {
+	String resolveProperty(String name, PropertyFilter filter) throws PropertyNotFoundException() {
+		if ("date".equals(name)) {
+			return new Date().toString();
+		}
+		throw new PropertyNotFoundException(name);
+	}
+}
+```
+
+It is pretty easy to implement the resolver, but Evo Filtering already provides a number of ready to use resolvers:
 
 * EnvironmentPropertyResolver - resolves ${env.NAME} with the value of environment variable named NAME.
 * SystemPropertyResolver - resolves ${NAME} from the Java system property provided with -DNAME="value"
