@@ -7,7 +7,8 @@
 		<version>1.8</version>
 		<relativePath />
 	</parent>
-	<artifactId>evo-filtering-parent</artifactId>
+	<groupId>org.atteo.filtering</groupId>
+	<artifactId>parent</artifactId>
 	<version>1.0-SNAPSHOT</version>
 	<packaging>pom</packaging>
 	<name>Evo Filtering</name>
@@ -25,7 +26,7 @@
 		<module>janino</module>
 	</modules>
 	<scm>
-		<connection>scm:git:https://github.com/atteo/evo-filtering.git</connection>
-		<url>https://github.com/atteo/evo-filtering</url>
+		<connection>scm:git:https://github.com/atteo/filtering.git</connection>
+		<url>https://github.com/atteo/filtering</url>
 	</scm>
 </project>
