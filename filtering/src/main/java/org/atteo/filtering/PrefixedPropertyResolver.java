@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.atteo.evo.filtering;
+package org.atteo.filtering;
 
 /**
  * Property resolver which handles properties with given prefix.

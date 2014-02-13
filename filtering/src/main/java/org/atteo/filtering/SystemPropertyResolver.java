@@ -11,21 +11,18 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.atteo.evo.filtering;
-
-import javax.annotation.Nonnull;
+package org.atteo.filtering;
 
 /**
- * Resolves property name to its value possibly resolving recursively any placeholders.
+ * Get property value from {@link System#getProperty(String) system properties}.
  */
-public interface PropertyResolver {
-	/**
-	 * Get value for the given property.
-	 * @param name name of the property to resolve
-	 * @param filter property filter to use when resolving recursively
-	 * @return value associated for the property
-	 * @throws PropertyNotFoundException when property cannot be resolved
-	 */
-	@Nonnull
-	String resolveProperty(String name, PropertyFilter filter) throws PropertyNotFoundException;
+public class SystemPropertyResolver extends SimplePropertyResolver {
+	@Override
+	public String getProperty(String name) throws PropertyNotFoundException {
+		String value = System.getProperty(name);
+		if (value == null) {
+			throw new PropertyNotFoundException(name);
+		}
+		return value;
+	}
 }

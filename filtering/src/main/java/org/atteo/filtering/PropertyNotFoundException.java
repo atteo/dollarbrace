@@ -11,18 +11,18 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.atteo.evo.filtering;
+package org.atteo.filtering;
 
 /**
- * Get property value from {@link System#getProperty(String) system properties}.
+ * Returned when property with the given name is not found.
  */
-public class SystemPropertyResolver extends SimplePropertyResolver {
-	@Override
-	public String getProperty(String name) throws PropertyNotFoundException {
-		String value = System.getProperty(name);
-		if (value == null) {
-			throw new PropertyNotFoundException(name);
-		}
-		return value;
+@SuppressWarnings("serial")
+public class PropertyNotFoundException extends Exception {
+	public PropertyNotFoundException(String propertyName) {
+		super("Property not found: '" + propertyName + "'");
+	}
+
+	public PropertyNotFoundException(String propertyName, Throwable cause) {
+		super("Property not found: '" + propertyName + "': " + cause.getMessage(), cause);
 	}
 }

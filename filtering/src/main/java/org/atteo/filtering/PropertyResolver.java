@@ -11,18 +11,21 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.atteo.evo.filtering;
+package org.atteo.filtering;
+
+import javax.annotation.Nonnull;
 
 /**
- * Returned when property with the given name is not found.
+ * Resolves property name to its value possibly resolving recursively any placeholders.
  */
-@SuppressWarnings("serial")
-public class PropertyNotFoundException extends Exception {
-	public PropertyNotFoundException(String propertyName) {
-		super("Property not found: '" + propertyName + "'");
-	}
-
-	public PropertyNotFoundException(String propertyName, Throwable cause) {
-		super("Property not found: '" + propertyName + "': " + cause.getMessage(), cause);
-	}
+public interface PropertyResolver {
+	/**
+	 * Get value for the given property.
+	 * @param name name of the property to resolve
+	 * @param filter property filter to use when resolving recursively
+	 * @return value associated for the property
+	 * @throws PropertyNotFoundException when property cannot be resolved
+	 */
+	@Nonnull
+	String resolveProperty(String name, PropertyFilter filter) throws PropertyNotFoundException;
 }

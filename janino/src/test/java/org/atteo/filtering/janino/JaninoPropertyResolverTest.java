@@ -11,15 +11,15 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.atteo.evo.janino;
+package org.atteo.filtering.janino;
 
 import java.util.Properties;
 
-import org.atteo.evo.filtering.CompoundPropertyResolver;
-import org.atteo.evo.filtering.Filtering;
-import org.atteo.evo.filtering.PropertiesPropertyResolver;
-import org.atteo.evo.filtering.PropertyFilter;
-import org.atteo.evo.filtering.PropertyNotFoundException;
+import org.atteo.filtering.CompoundPropertyResolver;
+import org.atteo.filtering.Filtering;
+import org.atteo.filtering.PropertiesPropertyResolver;
+import org.atteo.filtering.PropertyFilter;
+import org.atteo.filtering.PropertyNotFoundException;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import org.junit.Test;

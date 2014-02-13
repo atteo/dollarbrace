@@ -13,11 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.atteo.evo.filtering.spi;
+package org.atteo.filtering.spi;
 
 import java.util.List;
 
-import org.atteo.evo.filtering.spi.Tokenizer.Token;
+import org.atteo.filtering.spi.Tokenizer.Token;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;

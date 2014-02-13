@@ -11,14 +11,14 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.atteo.evo.filtering;
+package org.atteo.filtering;
 
 import java.util.HashSet;
 import java.util.List;
 import java.util.Properties;
 import java.util.Set;
 
-import org.atteo.evo.filtering.spi.Tokenizer;
+import org.atteo.filtering.spi.Tokenizer;
 import org.w3c.dom.Attr;
 import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
@@ -32,7 +32,7 @@ import org.w3c.dom.Text;
  */
 public class Filtering {
 	private final static class LoopCheckerPropertyFilter implements PropertyFilter {
-		private final Set<String> inProgress = new HashSet<String>();
+		private final Set<String> inProgress = new HashSet<>();
 		private final PropertyResolver resolver;
 
 		private LoopCheckerPropertyFilter(PropertyResolver resolver) {

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.atteo.evo.filtering.spi;
+package org.atteo.filtering.spi;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -50,7 +50,7 @@ public class Tokenizer {
      * @return list of tokens
      */
     public static List<Token> splitIntoTokens(String input) {
-        List<Token> parts = new ArrayList<Token>();
+        List<Token> parts = new ArrayList<>();
         int index = 0;
         while (true) {
             int startPosition = input.indexOf("${", index);

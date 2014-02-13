@@ -7,7 +7,7 @@
 		<version>1.0-SNAPSHOT</version>
 	</parent>
 	<artifactId>janino</artifactId>
-	<name>Property Resolver based on Janino</name>
+	<name>Atteo Filtering - Janino Resolver</name>
 	<dependencies>
 		<dependency>
 			<groupId>${project.groupId}</groupId>

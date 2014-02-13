@@ -11,14 +11,14 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.atteo.evo.janino;
+package org.atteo.filtering.janino;
 
 import java.lang.reflect.InvocationTargetException;
 
-import org.atteo.evo.filtering.PrefixedPropertyResolver;
-import org.atteo.evo.filtering.PropertyFilter;
-import org.atteo.evo.filtering.PropertyNotFoundException;
-import org.atteo.evo.filtering.PropertyResolver;
+import org.atteo.filtering.PrefixedPropertyResolver;
+import org.atteo.filtering.PropertyFilter;
+import org.atteo.filtering.PropertyNotFoundException;
+import org.atteo.filtering.PropertyResolver;
 import org.codehaus.commons.compiler.CompileException;
 import org.codehaus.janino.ExpressionEvaluator;
 

@@ -13,11 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.atteo.evo.filtering;
+package org.atteo.filtering;
 
 import java.util.List;
 
-import org.atteo.evo.filtering.spi.Tokenizer;
+import org.atteo.filtering.spi.Tokenizer;
 
 import com.google.common.base.Splitter;
 

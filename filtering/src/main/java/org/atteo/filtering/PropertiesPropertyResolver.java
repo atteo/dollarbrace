@@ -11,7 +11,7 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.atteo.evo.filtering;
+package org.atteo.filtering;
 
 import java.util.Properties;
 

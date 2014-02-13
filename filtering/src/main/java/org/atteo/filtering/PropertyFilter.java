@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.atteo.evo.filtering;
+package org.atteo.filtering;
 
 import org.w3c.dom.Element;
 
