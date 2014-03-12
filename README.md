@@ -5,6 +5,9 @@ Atteo Filtering provides mechanisms to filter strings, files and XML trees to pe
 
 Changes
 =======
+1.1 (2014-03-12)
+   	Filtering was incorrectly returning circular dependencies for missing properties
+
 1.0 (2014-02-13)
 	Splitted from evo-config
 	Separated filtering (PropertyFilter) from property resolution (PropertyResolver)
