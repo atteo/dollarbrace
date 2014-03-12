@@ -46,11 +46,11 @@ public class Filtering {
 			}
 			inProgress.add(name);
 
-			String value = resolver.resolveProperty(name, this);
-
-			inProgress.remove(name);
-
-			return value;
+			try {
+				return resolver.resolveProperty(name, this);
+			} finally {
+				inProgress.remove(name);
+			}
 		}
 
 		@Override

@@ -78,6 +78,12 @@ public class PropertyResolverTest {
 		Filtering.filter("${third}", resolver);
 	}
 
+	@Test(expected = PropertyNotFoundException.class)
+	public void shouldNotReportCircularRecursion() throws PropertyNotFoundException {
+		PropertyResolver resolver = new CompoundPropertyResolver(new OneOfPropertyResolver());
+		Filtering.filter("${oneof:${notfound},${notfound}}", resolver);
+	}
+
 	@Test
 	public void raw() throws PropertyNotFoundException {
 		PropertyResolver resolver = new RawPropertyResolver();
