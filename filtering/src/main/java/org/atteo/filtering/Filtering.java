@@ -91,12 +91,27 @@ public class Filtering {
 	}
 
 	/**
+	 * Returns property filter which resolver properties using provided properties.
+	 * <p>
+	 * This is equivalent to {@link #getFilter(PropertyResolver...)} with {@link PropertiesPropertyResolver}
+	 * as the sole parameter.
+	 * </p>
+	 * @param properties properties used for resolution
+	 * @return property filter
+	 */
+	public static PropertyFilter getFilter(Properties properties) {
+		return getFilter(new PropertiesPropertyResolver(properties));
+	}
+
+	/**
 	 * Resolves property with the given property resolver.
 	 * @param name property name to resolve
 	 * @param resolver property resolver
 	 * @return property value resolved with given resolver
 	 * @throws PropertyNotFoundException  when property is not found
+	 * @deprecated use {@link #getFilter(PropertyResolver...)}.{@link PropertyFilter#getProperty(String) getProperty(String)}
 	 */
+	@Deprecated
 	public static String getProperty(String name, PropertyResolver resolver) throws PropertyNotFoundException {
 		return new LoopCheckerPropertyFilter(resolver).getProperty(name);
 	}
@@ -107,7 +122,9 @@ public class Filtering {
 	 * @param resolver resolver for the property values
 	 * @return filtered value
 	 * @throws PropertyNotFoundException when some property cannot be found
+	 * @deprecated use {@link #getFilter(PropertyResolver...)}.{@link PropertyFilter#filter(String) filter(String)}
 	 */
+	@Deprecated
 	public static String filter(String value, PropertyResolver resolver) throws PropertyNotFoundException {
 		return new LoopCheckerPropertyFilter(resolver).filter(value);
 	}
@@ -118,7 +135,9 @@ public class Filtering {
 	 * @param properties properties to filter into the value
 	 * @return filtered value
 	 * @throws PropertyNotFoundException when some property cannot be found
+	 * @deprecated use {@link #getFilter(Properties)}.{@link PropertyFilter#filter(String) filter(String)}
 	 */
+	@Deprecated
 	public static String filter(String value, final Properties properties)
 			throws PropertyNotFoundException {
 
@@ -135,7 +154,9 @@ public class Filtering {
 	 * @param element XML element to filter
 	 * @param resolver property resolver
 	 * @throws PropertyNotFoundException when some property could not be resolved
+	 * @deprecated use {@link #getFilter(PropertyResolver...)}.{@link PropertyFilter#filter(Element) filter(Element)}
 	 */
+	@Deprecated
 	public static void filter(Element element, PropertyResolver resolver) throws PropertyNotFoundException {
 		getFilter(resolver).filter(element);
 	}
@@ -146,8 +167,9 @@ public class Filtering {
 	 * @param element XML element to filter
 	 * @param properties properties to filter
 	 * @throws PropertyNotFoundException when some property could not be resolved
-	 * @see #filter(Element, PropertyResolver)
+	 * @deprecated use {@link #getFilter(Properties)}.{@link PropertyFilter#filter(Element) filter(Element)}
 	 */
+	@Deprecated
 	public static void filter(Element element, Properties properties) throws PropertyNotFoundException {
 		filter(element, new PropertiesPropertyResolver(properties));
 	}
