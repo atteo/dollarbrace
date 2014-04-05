@@ -80,7 +80,8 @@ public class XmlFilteringTest {
 
 		Document document = builder.parse(new ByteArrayInputStream(xml.getBytes("UTF-8")));
 
-		Filtering.filter(document.getDocumentElement(), properties);
+		PropertyFilter filter = Filtering.getFilter(new PropertiesPropertyResolver(properties));
+		filter.filter(document.getDocumentElement());
 
 		Transformer transformer = TransformerFactory.newInstance().newTransformer();
 		StringWriter writer = new StringWriter();
