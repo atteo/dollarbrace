@@ -16,6 +16,9 @@
 
 package org.atteo.filtering;
 
+import java.io.IOException;
+import java.nio.file.Path;
+
 import org.w3c.dom.Element;
 
 /**
@@ -44,4 +47,15 @@ public interface PropertyFilter {
 	 * @throws PropertyNotFoundException when some property could not be resolved
 	 */
 	void filter(Element element) throws PropertyNotFoundException;
+
+	/**
+	 * Filters given source file and stores filtered content into destination file.
+	 * <p>
+	 * Assumes the file is using UTF-8 encoding.
+	 * </p>
+	 * @param source source file
+	 * @param destination destination to which filtered content will be stored
+	 * @throws PropertyNotFoundException when some property could not be resolved
+	 */
+	void filterFile(Path source, Path destination) throws PropertyNotFoundException, IOException;
 }

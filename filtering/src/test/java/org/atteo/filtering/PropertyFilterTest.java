@@ -15,95 +15,133 @@ package org.atteo.filtering;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Properties;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 import org.junit.Test;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
-public class PropertyResolverTest {
+public class PropertyFilterTest {
 	@Test
 	public void system() throws PropertyNotFoundException {
+		// given
 		System.setProperty("testKey", "testValue");
 
-		assertEquals("system: testValue", Filtering.filter("system: ${testKey}",
-				new SystemPropertyResolver()));
+		// when
+		String result = Filtering.getFilter(new SystemPropertyResolver()).filter("system: ${testKey}");
+
+		// then
+		assertThat(result).isEqualTo("system: testValue");
 	}
 
 	@Test
 	public void env() throws PropertyNotFoundException {
+		// given
 		if (System.getenv("PATH") != null) {
 			System.out.println("PATH not defined, environment based test skipped");
+			return;
 		}
-		Filtering.filter("env: ${env.PATH}", new EnvironmentPropertyResolver());
+
+		// when
+		String result = Filtering.getFilter(new EnvironmentPropertyResolver()).filter("env: ${env.PATH}");
+
+		// then
+		assertThat(result).isNotNull();
 	}
 
 	@Test(expected = PropertyNotFoundException.class)
 	public void envNotFound() throws PropertyNotFoundException {
-		Filtering.filter("env: ${env.ASDFASICSAPWOECM_123}", new EnvironmentPropertyResolver());
+		// when
+		Filtering.getFilter(new EnvironmentPropertyResolver()).filter("env: ${env.ASDFASICSAPWOECM_123}");
 	}
 
 	@Test
 	public void recursion() throws PropertyNotFoundException {
+		// given
 		System.setProperty("first", "value");
 		System.setProperty("second", "${first} ${first}");
 		System.setProperty("third", "${first} ${second}");
 
-		PropertyResolver resolver = new SystemPropertyResolver();
-		assertEquals("value value value", Filtering.filter("${third}", resolver));
+		// when
+		String result = Filtering.getFilter(new SystemPropertyResolver()).filter("${third}");
+
+		// then
+		assertThat(result).isEqualTo("value value value");
 	}
 
 	@Test
 	public void isRecursionSafe() throws PropertyNotFoundException {
+		// given
 		Properties properties = new Properties();
 		properties.setProperty("first", "${");
 		properties.setProperty("second", "test}");
 		properties.setProperty("compound", "${first}${second}");
-		PropertyResolver resolver = new PropertiesPropertyResolver(properties);
-		assertEquals("${test}", Filtering.getProperty("compound", resolver));
+
+		// when
+		String result = Filtering.getFilter(new PropertiesPropertyResolver(properties)).getProperty("compound");
+
+		// then
+		assertThat(result).isEqualTo("${test}");
 	}
 
 	@Test(expected = CircularPropertyResolutionException.class)
 	public void circularRecursion() throws PropertyNotFoundException {
+		// given
 		System.setProperty("first", "${third}");
 		System.setProperty("second", "${first} ${first}");
 		System.setProperty("third", "${first} ${second}");
 
-		PropertyResolver resolver = new SystemPropertyResolver();
-		Filtering.filter("${third}", resolver);
+		// when
+		Filtering.getFilter(new SystemPropertyResolver()).filter("${third}");
 	}
 
 	@Test(expected = PropertyNotFoundException.class)
 	public void shouldNotReportCircularRecursion() throws PropertyNotFoundException {
-		PropertyResolver resolver = new CompoundPropertyResolver(new OneOfPropertyResolver());
-		Filtering.filter("${oneof:${notfound},${notfound}}", resolver);
+		// given
+		PropertyFilter filter = Filtering.getFilter(new CompoundPropertyResolver(new OneOfPropertyResolver()));
+
+		// when
+		String result = filter.filter("${oneof:${notfound},${notfound}}");
 	}
 
 	@Test
 	public void raw() throws PropertyNotFoundException {
-		PropertyResolver resolver = new RawPropertyResolver();
-		assertEquals("${abc${abc}}abc", Filtering.getProperty("raw:${abc${abc}}abc", resolver));
+		// given
+		PropertyFilter filter = Filtering.getFilter(new RawPropertyResolver());
+
+		// when
+		String result = filter.getProperty("raw:${abc${abc}}abc");
+
+		// then
+		assertThat(result).isEqualTo("${abc${abc}}abc");
 	}
 
 	@Test
 	public void oneof() throws PropertyNotFoundException {
+		// given
 		Properties properties = new Properties();
 		properties.setProperty("second", "value");
-		PropertyResolver propertiesResolver = new PropertiesPropertyResolver(properties);
-		PropertyResolver oneOfResolver = new OneOfPropertyResolver();
-		PropertyResolver resolver = new CompoundPropertyResolver(propertiesResolver, oneOfResolver);
-		assertEquals("value1", Filtering.filter("${oneof:1${abc}2,${second}1}", resolver));
-		assertEquals("value", Filtering.filter("${oneof:${second}}", resolver));
-		assertEquals("xx", Filtering.filter("${oneof:${abc},xx,yy,${cde}}", resolver));
+		PropertyFilter filter = Filtering.getFilter(new OneOfPropertyResolver(),
+				new PropertiesPropertyResolver(properties));
+
+		// then
+		assertThat(filter.filter("${oneof:1${abc}2,${second}1}")).isEqualTo("value1");
+		assertThat(filter.filter("${oneof:${second}}")).isEqualTo("value");
+		assertThat(filter.filter("${oneof:${abc},xx,yy,${cde}}")).isEqualTo("xx");
 	}
 
 	@Test
 	public void xml() throws ParserConfigurationException, SAXException, IOException, PropertyNotFoundException {
+		// given
 		String xml = "<config>"
 				+ "<a value='test'/>"
 				+ "<b>test2</b>"
@@ -117,24 +155,47 @@ public class PropertyResolverTest {
 
 		Document document = builder.parse(new ByteArrayInputStream(xml.getBytes("UTF-8")));
 
-		PropertyResolver resolver = new XmlPropertyResolver(document.getDocumentElement(), true);
-		assertEquals("test", Filtering.getProperty("config.a.value", resolver));
-		assertEquals("test2", Filtering.getProperty("config.b", resolver));
-		assertEquals("test3", Filtering.getProperty("config.c.d", resolver));
-		assertEquals("test6", Filtering.getProperty("config.g.h.i", resolver));
+		PropertyFilter filter = Filtering.getFilter(new XmlPropertyResolver(document.getDocumentElement(), true));
+		PropertyFilter rootFilter = Filtering.getFilter(new XmlPropertyResolver(document.getDocumentElement(), false));
 
-		resolver = new XmlPropertyResolver(document.getDocumentElement(), false);
-		assertEquals("test", Filtering.getProperty("a.value", resolver));
-		assertEquals("test6", Filtering.getProperty("g.h.i", resolver));
+		// then
+		assertThat(filter.getProperty("config.a.value")).isEqualTo("test");
+		assertThat(filter.getProperty("config.b")).isEqualTo("test2");
+		assertThat(filter.getProperty("config.c.d")).isEqualTo("test3");
+		assertThat(filter.getProperty("config.g.h.i")).isEqualTo("test6");
+
+		assertThat(rootFilter.getProperty("a.value")).isEqualTo("test");
+		assertThat(rootFilter.getProperty("g.h.i")).isEqualTo("test6");
 	}
 
 	@Test(expected = PropertyNotFoundException.class)
 	public void shouldThrowWhenPropertyIsNotFound() throws PropertyNotFoundException {
-		Filtering.getProperty("a", new PropertyResolver() {
+		// given
+		PropertyFilter filter = Filtering.getFilter(new PropertyResolver() {
 			@Override
 			public String resolveProperty(String name, PropertyFilter filter) throws PropertyNotFoundException {
 				throw new PropertyNotFoundException(name);
 			}
 		});
+
+		// then
+		filter.getProperty("a");
+	}
+
+	@Test
+	public void shouldFilterFile() throws IOException, PropertyNotFoundException {
+		// given
+		Path source = Paths.get("target", "source");
+		Path destination = Paths.get("target", "destination");
+		Files.write(source, "key: ${key}".getBytes(StandardCharsets.UTF_8));
+		Properties properties = new Properties();
+		properties.setProperty("key", "value");
+		PropertyFilter filter = Filtering.getFilter(new PropertiesPropertyResolver(properties));
+
+		// when
+		filter.filterFile(source, destination);
+
+		// then
+		assertThat(destination.toFile()).usingCharset(StandardCharsets.UTF_8).hasContent("key: value");
 	}
 }

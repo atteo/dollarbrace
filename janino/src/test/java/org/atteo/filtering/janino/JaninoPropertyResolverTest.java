@@ -15,63 +15,82 @@ package org.atteo.filtering.janino;
 
 import java.util.Properties;
 
-import org.atteo.filtering.CompoundPropertyResolver;
+import static org.assertj.core.api.Assertions.assertThat;
 import org.atteo.filtering.Filtering;
 import org.atteo.filtering.PropertiesPropertyResolver;
 import org.atteo.filtering.PropertyFilter;
 import org.atteo.filtering.PropertyNotFoundException;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 import org.junit.Test;
 
 public class JaninoPropertyResolverTest {
 	@Test
 	public void simple() throws PropertyNotFoundException {
-		JaninoPropertyResolver resolver = new JaninoPropertyResolver();
-		String result = Filtering.getProperty("java:new java.util.Date()", resolver);
-		assertNotNull(result);
+		// given
+		PropertyFilter filter = Filtering.getFilter(new JaninoPropertyResolver());
 
-		result = Filtering.getProperty("java:3+3", resolver);
-		assertEquals("6", result);
+		// when
+		String result = filter.getProperty("java:new java.util.Date()");
+		String result2 = filter.getProperty("java:3+3");
+
+		// then
+		assertThat(result).isNotNull();
+		assertThat(result2).isEqualTo("6");
 	}
 
 	@Test(expected = PropertyNotFoundException.class)
 	public void noPrefix() throws PropertyNotFoundException {
-		JaninoPropertyResolver resolver = new JaninoPropertyResolver();
+		// given
+		PropertyFilter filter = Filtering.getFilter(new JaninoPropertyResolver());
 
-		Filtering.getProperty("3+3", resolver);
+		// when
+		filter.getProperty("3+3");
 	}
 
 	@Test(expected = RuntimeException.class)
 	public void forced() throws PropertyNotFoundException {
-		JaninoPropertyResolver resolver = new JaninoPropertyResolver();
-		Filtering.getProperty("java: asdf", resolver);
+		// given
+		PropertyFilter filter = Filtering.getFilter(new JaninoPropertyResolver());
+
+		// when
+		filter.getProperty("java: asdf");
 	}
 
 	@Test
 	public void compound() throws PropertyNotFoundException {
+		// given
 		Properties properties = new Properties();
 		properties.setProperty("test1", "${java:3+3}");
 		properties.setProperty("test2", "${test${java:2-1}}");
 		PropertyFilter filter = Filtering.getFilter(
 				new JaninoPropertyResolver(),
 				new PropertiesPropertyResolver(properties));
-		assertEquals("6", filter.getProperty("test2"));
+
+		// when
+		String result = filter.getProperty("test2");
+
+		// then
+		assertThat(result).isEqualTo("6");
 	}
 
 	@Test(expected = PropertyNotFoundException.class)
 	public void notFound() throws PropertyNotFoundException {
+		// given
 		Properties properties = new Properties();
 		properties.setProperty("test2", "${test${java:2-1}}");
-		CompoundPropertyResolver resolver = new CompoundPropertyResolver(
-				new JaninoPropertyResolver(),
+		PropertyFilter filter = Filtering.getFilter(new JaninoPropertyResolver(),
 				new PropertiesPropertyResolver(properties));
-		Filtering.getProperty("test2", resolver);
+
+		// when
+		filter.getProperty("test2");
 	}
 
 	@Test
 	public void executingFunctionThrowingCheckedException() throws PropertyNotFoundException {
-		Filtering.getProperty("java: java.lang.String.class.getResource(\"/java/lang/String.class\")"
-				+ ".toURI().toString()", new JaninoPropertyResolver());
+		// given
+		PropertyFilter filter = Filtering.getFilter(new JaninoPropertyResolver());
+
+		// when
+		filter.getProperty("java: java.lang.String.class.getResource(\"/java/lang/String.class\")"
+				+ ".toURI().toString()");
 	}
 }

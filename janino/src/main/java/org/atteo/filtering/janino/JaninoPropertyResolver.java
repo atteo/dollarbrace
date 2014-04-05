@@ -71,13 +71,7 @@ public class JaninoPropertyResolver implements PrefixedPropertyResolver {
 		try {
 			evaluator.cook(name);
 			return evaluator.evaluate(new Object[] {}).toString();
-		} catch (CompileException e) {
-			if (!throwErrors) {
-				throw new PropertyNotFoundException(name);
-			}
-			// TODO: new SyntaxException?
-			throw new RuntimeException(e);
-		} catch (InvocationTargetException e) {
+		} catch (CompileException | InvocationTargetException e) {
 			if (!throwErrors) {
 				throw new PropertyNotFoundException(name);
 			}

@@ -13,6 +13,10 @@
  */
 package org.atteo.filtering;
 
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Properties;
@@ -31,11 +35,14 @@ import org.w3c.dom.Text;
  * Properties filtering engine.
  */
 public class Filtering {
-	private final static class LoopCheckerPropertyFilter implements PropertyFilter {
+	/**
+	 * Property filter which throws {@link CircularPropertyResolutionException} when
+	 */
+	private final static class LoopCheckPropertyFilter implements PropertyFilter {
 		private final Set<String> inProgress = new HashSet<>();
 		private final PropertyResolver resolver;
 
-		private LoopCheckerPropertyFilter(PropertyResolver resolver) {
+		private LoopCheckPropertyFilter(PropertyResolver resolver) {
 			this.resolver = resolver;
 		}
 
@@ -76,6 +83,14 @@ public class Filtering {
 		public void filter(Element element) throws PropertyNotFoundException {
 			new XmlFiltering(this).filterElement(element);
 		}
+
+		@Override
+		public void filterFile(Path source, Path destination) throws PropertyNotFoundException, IOException {
+			String content = new String(Files.readAllBytes(source), StandardCharsets.UTF_8);
+			String result = filter(content);
+
+			Files.write(destination, result.getBytes(StandardCharsets.UTF_8));
+		}
 	}
 
 	/**
@@ -85,9 +100,9 @@ public class Filtering {
 	 */
 	public static PropertyFilter getFilter(PropertyResolver... resolvers) {
 		if (resolvers.length == 1) {
-			return new LoopCheckerPropertyFilter(resolvers[0]);
+			return new LoopCheckPropertyFilter(resolvers[0]);
 		}
-		return new LoopCheckerPropertyFilter(new CompoundPropertyResolver(resolvers));
+		return new LoopCheckPropertyFilter(new CompoundPropertyResolver(resolvers));
 	}
 
 	/**
@@ -113,7 +128,7 @@ public class Filtering {
 	 */
 	@Deprecated
 	public static String getProperty(String name, PropertyResolver resolver) throws PropertyNotFoundException {
-		return new LoopCheckerPropertyFilter(resolver).getProperty(name);
+		return new LoopCheckPropertyFilter(resolver).getProperty(name);
 	}
 
 	/**
@@ -126,7 +141,7 @@ public class Filtering {
 	 */
 	@Deprecated
 	public static String filter(String value, PropertyResolver resolver) throws PropertyNotFoundException {
-		return new LoopCheckerPropertyFilter(resolver).filter(value);
+		return new LoopCheckPropertyFilter(resolver).filter(value);
 	}
 
 	/**
