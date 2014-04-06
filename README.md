@@ -5,8 +5,10 @@ Atteo Filtering provides mechanisms to filter strings, files and XML trees to pe
 
 Changes
 =======
+1.2 (2014-04-06)
+    Added file filtering
 1.1 (2014-03-12)
-   	Filtering was incorrectly returning circular dependencies for missing properties
+	Filtering was incorrectly returning circular dependencies for missing properties
 
 1.0 (2014-02-13)
 	Splitted from evo-config
@@ -20,14 +22,16 @@ To resolve any ${name} in given string from given Properties object just execute
 Properties properties;
 String contentToFilter;
 
-Filtering.filter(contentToFilter, new  PropertiesPropertyResolve(properties));
+PropertyFilter filter = Filtering.getFilter(new PropertiesPropertyResolver(properties);
+
+String filteredResult = filter.filter(contentToFilter);
 ```
 
 In-depth description
 ====================
 
-Filtering.filter(String, PropertyResolver) method allows you to filter the string by replacing any ${name}
-with the value produced by the provided resolver.
+filter(String) method allows you to filter the string by replacing any ${name}
+with the value produced by the provided resolvers.
 
 Each resolver is required to implement PropertyResolver interface:
 
@@ -50,7 +54,7 @@ public class DatePropertyResolver implements PropertyResolver {
 }
 ```
 
-It is pretty easy to implement the resolver, but the library already provides a number of ready to use resolvers:
+It is pretty easy to implement new resolver, but the library already provides a number of ready to use resolvers:
 
 * EnvironmentPropertyResolver - resolves ${env.NAME} with the value of environment variable named NAME.
 * SystemPropertyResolver - resolves ${NAME} from the Java system property provided with -DNAME="value"
@@ -72,16 +76,6 @@ It is pretty easy to implement the resolver, but the library already provides a 
 <dependency>
     <groupId>org.atteo.filtering</groupId>
     <artifactId>janino</artifactId>
-    <version>1.0</version>
+    <version>1.2</version>
 </dependency>
 ```
-
-* CompoundPropertyResolver - allows to combine a number of other property resolvers which are executed in turn till any returns some value.
-  Example:
-
-```java
-new CompoundPropertyResolver(new EnvironmentPropertyResolver(), new SystemPropertyResolver());
-```
-
-This will create property resolver which supports both environment and system properties.
-
