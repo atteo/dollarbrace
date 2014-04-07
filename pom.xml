@@ -4,7 +4,7 @@
 	<parent>
 		<artifactId>parent</artifactId>
 		<groupId>org.atteo</groupId>
-		<version>1.9</version>
+		<version>1-SNAPSHOT</version>
 		<relativePath />
 	</parent>
 	<groupId>org.atteo.filtering</groupId>
