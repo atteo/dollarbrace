@@ -4,7 +4,7 @@
 	<parent>
 		<artifactId>parent</artifactId>
 		<groupId>org.atteo.filtering</groupId>
-		<version>1.0-SNAPSHOT</version>
+		<version>1-SNAPSHOT</version>
 	</parent>
 	<artifactId>janino</artifactId>
 	<name>Atteo Filtering - Janino Resolver</name>

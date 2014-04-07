@@ -9,7 +9,7 @@
 	</parent>
 	<groupId>org.atteo.filtering</groupId>
 	<artifactId>parent</artifactId>
-	<version>1.0-SNAPSHOT</version>
+	<version>1-SNAPSHOT</version>
 	<packaging>pom</packaging>
 	<name>Atteo Filtering</name>
 	<!-- Javadoc adds /apidocs to this URL when it tries to find Javadocs. Make it happy. -->
