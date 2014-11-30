@@ -19,6 +19,8 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -197,5 +199,53 @@ public class PropertyFilterTest {
 
 		// then
 		assertThat(destination.toFile()).usingCharset(StandardCharsets.UTF_8).hasContent("key: value");
+	}
+
+	@Test
+	public void shouldFilterConcurrently() throws InterruptedException {
+		final PropertyFilter filter = Filtering.getFilter(new PropertyResolver() {
+			@Override
+			public String resolveProperty(String name, PropertyFilter filter) throws PropertyNotFoundException {
+				try {
+					Thread.currentThread().sleep(2000l);
+				} catch (InterruptedException e) {
+					Thread.currentThread().interrupt();
+				}
+				return "result";
+			}
+		});
+
+		class SleepThread extends Thread {
+			@Override
+			public void run() {
+				try {
+					filter.getProperty("test");
+				} catch (PropertyNotFoundException e) {
+					throw new RuntimeException(e);
+				}
+			}
+		}
+
+		final List<Throwable> exceptions = new ArrayList<>();
+
+		Thread.UncaughtExceptionHandler handler = new Thread.UncaughtExceptionHandler() {
+			@Override
+			public void uncaughtException(Thread t, Throwable e) {
+				exceptions.add(e);
+			}
+		};
+
+		Thread thread1 = new SleepThread();
+		Thread thread2 = new SleepThread();
+		thread1.setUncaughtExceptionHandler(handler);
+		thread2.setUncaughtExceptionHandler(handler);
+
+		thread1.start();
+		thread2.start();
+
+		thread1.join();
+		thread2.join();
+
+		assertThat(exceptions).isEmpty();
 	}
 }

@@ -61,8 +61,8 @@ public class Filtering {
 		}
 
 		@Override
-		public String filter(String name) throws PropertyNotFoundException {
-			List<Tokenizer.Token> parts = Tokenizer.splitIntoTokens(name);
+		public String filter(String value) throws PropertyNotFoundException {
+			List<Tokenizer.Token> parts = Tokenizer.splitIntoTokens(value);
 			StringBuilder result = new StringBuilder();
 
 			for (Tokenizer.Token part : parts) {
@@ -93,16 +93,47 @@ public class Filtering {
 		}
 	}
 
+	private static class PublicPropertyFilter implements PropertyFilter {
+		private final PropertyResolver resolver;
+
+		public PublicPropertyFilter(PropertyResolver resolver) {
+			this.resolver = resolver;
+		}
+
+		@Override
+		public String filter(String value) throws PropertyNotFoundException {
+			return new LoopCheckPropertyFilter(resolver).filter(value);
+		}
+
+		@Override
+		public String getProperty(String name) throws PropertyNotFoundException {
+			return new LoopCheckPropertyFilter(resolver).getProperty(name);
+		}
+
+		@Override
+		public void filter(Element element) throws PropertyNotFoundException {
+			new LoopCheckPropertyFilter(resolver).filter(element);
+		}
+
+		@Override
+		public void filterFile(Path source, Path destination) throws PropertyNotFoundException, IOException {
+			new LoopCheckPropertyFilter(resolver).filterFile(source, destination);
+		}
+	}
+
 	/**
 	 * Returns property filter which resolves properties using provided resolvers.
+	 * <p>
+	 * The returned property filter is thread-safe.
+	 * </p>
 	 * @param resolvers property resolvers
 	 * @return property filter
 	 */
 	public static PropertyFilter getFilter(PropertyResolver... resolvers) {
 		if (resolvers.length == 1) {
-			return new LoopCheckPropertyFilter(resolvers[0]);
+			return new PublicPropertyFilter(resolvers[0]);
 		}
-		return new LoopCheckPropertyFilter(new CompoundPropertyResolver(resolvers));
+		return new PublicPropertyFilter(new CompoundPropertyResolver(resolvers));
 	}
 
 	/**
