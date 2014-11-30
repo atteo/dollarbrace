@@ -4,7 +4,7 @@
 	<parent>
 		<artifactId>parent</artifactId>
 		<groupId>org.atteo.filtering</groupId>
-		<version>1-SNAPSHOT</version>
+		<version>1.3</version>
 	</parent>
 	<artifactId>filtering</artifactId>
 	<name>Atteo Filtering</name>
