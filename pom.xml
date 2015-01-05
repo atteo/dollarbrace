@@ -7,13 +7,13 @@
 		<version>1.13</version>
 		<relativePath />
 	</parent>
-	<groupId>org.atteo.filtering</groupId>
+	<groupId>org.atteo.dollarbrace</groupId>
 	<artifactId>parent</artifactId>
-	<version>1-SNAPSHOT</version>
+	<version>2-SNAPSHOT</version>
 	<packaging>pom</packaging>
-	<name>Atteo Filtering</name>
+	<name>DollarBrace expressions filtering</name>
 	<!-- Javadoc adds /apidocs to this URL when it tries to find Javadocs. Make it happy. -->
-	<url>http://atteo.org/static/filtering</url>
+	<url>http://atteo.org/static/dollarbrace</url>
 	<developers>
 		<developer>
 			<id>sentinel</id>
@@ -22,12 +22,12 @@
 		</developer>
 	</developers>
 	<modules>
-		<module>filtering</module>
+		<module>dollarbrace</module>
 		<module>janino</module>
 	</modules>
 	<scm>
-		<connection>scm:git:https://github.com/atteo/filtering.git</connection>
-		<url>https://github.com/atteo/filtering</url>
+		<connection>scm:git:https://github.com/atteo/dollarbrace.git</connection>
+		<url>https://github.com/atteo/dollarbrace</url>
 	</scm>
 </project>
 
