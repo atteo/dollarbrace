@@ -1,3 +1,8 @@
+[![Build Status](https://travis-ci.org/atteo/dollarbrace.svg)](https://travis-ci.org/atteo/dollarbrace)
+[![Coverage Status](https://img.shields.io/coveralls/atteo/dollarbrace.svg)](https://coveralls.io/r/atteo/dollarbrace)
+[![Maven Central](https://maven-badges.herokuapp.com/maven-central/org.atteo/dollarbrace/badge.svg)](https://maven-badges.herokuapp.com/maven-central/org.atteo.dollarbrace/dollarbrace)
+[![Apache 2](http://img.shields.io/badge/license-Apache%202-red.svg)](http://www.apache.org/licenses/LICENSE-2.0)
+
 Overview
 ========
 
