@@ -45,15 +45,15 @@ public class PropertyNotFoundException extends Exception {
 		StringBuilder sb = new StringBuilder();
 		sb.append("'").append(propertyName).append("'");
 
-		Throwable couse = getCause();
+		Throwable cause = getCause();
 		String lastProperty = null;
 
-		while (couse != null) {
-			if (couse instanceof PropertyNotFoundException) {
-				lastProperty =((PropertyNotFoundException) couse).propertyName;
+		while (cause != null) {
+			if (cause instanceof PropertyNotFoundException) {
+				lastProperty =((PropertyNotFoundException) cause).propertyName;
 				sb.append(" -> '").append(lastProperty).append("'");
 			}
-			couse = couse.getCause();
+			cause = cause.getCause();
 		}
 		if (lastProperty == null) {
 			sb.insert(0, "Property not found: ");
