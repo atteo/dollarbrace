@@ -18,11 +18,49 @@ package org.atteo.dollarbrace;
  */
 @SuppressWarnings("serial")
 public class PropertyNotFoundException extends Exception {
+
+	private final String propertyName;
+
 	public PropertyNotFoundException(String propertyName) {
-		super("Property not found: '" + propertyName + "'");
+		super();
+		this.propertyName = propertyName;
 	}
 
 	public PropertyNotFoundException(String propertyName, Throwable cause) {
-		super("Property not found: '" + propertyName + "': " + cause.getMessage(), cause);
+		super(cause);
+		this.propertyName = propertyName;
+	}
+
+	public PropertyNotFoundException(String propertyName, PropertyNotFoundException cause) {
+		super();
+		this.propertyName = propertyName;
+		if ( cause != null && !propertyName.equals(cause.propertyName)) {
+			initCause(cause);
+		}
+	}
+
+	@Override
+	public String getMessage() {
+
+		StringBuilder sb = new StringBuilder();
+		sb.append("'").append(propertyName).append("'");
+
+		Throwable couse = getCause();
+		String lastProperty = null;
+
+		while (couse != null) {
+			if (couse instanceof PropertyNotFoundException) {
+				lastProperty =((PropertyNotFoundException) couse).propertyName;
+				sb.append(" -> '").append(lastProperty).append("'");
+			}
+			couse = couse.getCause();
+		}
+		if (lastProperty == null) {
+			sb.insert(0, "Property not found: ");
+		} else {
+			sb.insert(0, "Property not found: '" + lastProperty + "' [");
+			sb.append("]");
+		}
+		return sb.toString();
 	}
 }

@@ -41,11 +41,18 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
 import static org.assertj.core.api.Assertions.assertThat;
+
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
 public class PropertyFilterTest {
+
+	@Rule
+	public ExpectedException expectedEx = ExpectedException.none();
+
 	@Test
 	public void system() throws PropertyNotFoundException {
 		// given
@@ -195,6 +202,24 @@ public class PropertyFilterTest {
 
 		// then
 		filter.getProperty("a");
+	}
+
+	@Test
+	public void recursivePropertyNotFoundReport() throws PropertyNotFoundException {
+		// given
+		expectedEx.expect(PropertyNotFoundException.class);
+		expectedEx.expectMessage("Property not found: 'third' ['first' -> 'second' -> 'third']");
+
+		Properties properties = new Properties();
+
+		properties.setProperty("first", "${second}");
+		properties.setProperty("second", "${third}");
+
+		CompoundPropertyResolver resolver = new CompoundPropertyResolver();
+		resolver.addPropertyResolver(new PropertiesPropertyResolver(properties));
+
+		// when
+		DollarBrace.getFilter(resolver).filter("${first}");
 	}
 
 	@Test

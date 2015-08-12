@@ -56,24 +56,26 @@ public class CompoundPropertyResolver implements PropertyResolver {
 	public String resolveProperty(String name, PropertyFilter recurse) throws PropertyNotFoundException {
 		for (Entry<String, Collection<PrefixedPropertyResolver>> entry : prefixedResolvers.asMap().entrySet()) {
 			if (name.startsWith(entry.getKey())) {
+				PropertyNotFoundException lastException = null;
 				for (PrefixedPropertyResolver resolver : entry.getValue()) {
 					try {
 						return resolver.resolveProperty(name, recurse);
 					} catch (PropertyNotFoundException e) {
-						// ok, try next one
+						lastException = e;
 					}
 				}
-				throw new PropertyNotFoundException(name);
+				throw new PropertyNotFoundException(name, lastException);
 			}
 		}
 
+		PropertyNotFoundException lastException = null;
 		for (PropertyResolver resolver : resolvers) {
 			try {
 				return resolver.resolveProperty(name, recurse);
 			} catch (PropertyNotFoundException e) {
-				// ok, try next one
+				lastException = e;
 			}
 		}
-		throw new PropertyNotFoundException(name);
+		throw new PropertyNotFoundException(name, lastException);
 	}
 }
