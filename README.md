@@ -26,6 +26,10 @@ The filtering result will be
 
 Changes
 =======
+2.0 (2015-07-17)
+	Change name to DollarBrace
+	Better error reporting for recursive property resolution
+
 1.3 (2014-11-30)
 	fix: PropertyFilter returned from getFilter was not thread-safe
 
