@@ -22,7 +22,6 @@ public class PropertyNotFoundException extends Exception {
 	private final String propertyName;
 
 	public PropertyNotFoundException(String propertyName) {
-		super();
 		this.propertyName = propertyName;
 	}
 
@@ -32,7 +31,6 @@ public class PropertyNotFoundException extends Exception {
 	}
 
 	public PropertyNotFoundException(String propertyName, PropertyNotFoundException cause) {
-		super();
 		this.propertyName = propertyName;
 		if ( cause != null && !propertyName.equals(cause.propertyName)) {
 			initCause(cause);
