@@ -37,6 +37,10 @@ public class PropertyNotFoundException extends Exception {
 		}
 	}
 
+	public String getPropertyName() {
+		return propertyName;
+	}
+
 	@Override
 	public String getMessage() {
 
